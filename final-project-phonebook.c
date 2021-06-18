@@ -2,59 +2,59 @@
 #include <string.h>
 #include <stdlib.h>
 
-typedef struct pbentry {
-	char lastname[16];
-	char firstname[11];
+typedef struct phonebook {
+  char firstname[100];
+	char lastname[100];
 	char phone[11];
-	char email[26];
-} Entry;
+	char email[100];
+} NODE;
 
 /*Create tree node structure.*/
-struct tree_node {
-	Entry data;
-	struct tree_node *left;
-	struct tree_node *right;
+struct tree {
+	NODE data;
+	struct tree *left;
+	struct tree *right;
 };
 
 //function
-struct tree_node * insert(struct tree_node *p, Entry e);
-struct tree_node * create_node (struct tree_node *q, struct tree_node *r, Entry e);
-struct tree_node * delete_node (struct tree_node *p, char l[], char f[]);
-struct tree_node * findmin(struct tree_node *p);
-struct tree_node * edit_node (struct tree_node *p, char l[], char f[]);
-void search_node(struct tree_node *p, char l[], char f[]);
-void print_tree(struct tree_node *p);
+struct tree * insert(struct tree *node, NODE e);
+struct tree * create_node (struct tree *q, struct tree *r, NODE e);
+struct tree * delete_node (struct tree *node, char l[], char f[]);
+struct tree * findmin(struct tree *node);
+struct tree * edit_node (struct tree *node, char l[], char f[]);
+void search_node(struct tree *node, char l[], char f[]);
+void print_tree(struct tree *node);
 
 
 /*Adds a node to the tree.*/
-struct tree_node * insert(struct tree_node *p, Entry e) {
-	if (p == NULL) {
-		p = create_node(NULL, NULL, e); //membuat root
+struct tree * insert(struct tree *node, NODE e) {
+	if (node == NULL) {
+		node = create_node(NULL, NULL, e); //membuat root
 	}
 	else {
-		if (strcmp(e.firstname, p->data.firstname) < 0) {
-			p->left = insert(p->left, e);
+		if (strcmp(e.firstname, node->data.firstname) < 0) {
+			node->left = insert(node->left, e);
 		}
-		else if (strcmp(e.firstname, p->data.firstname) > 0) {
-			p->right = insert(p->right, e);
+		else if (strcmp(e.firstname, node->data.firstname) > 0) {
+			node->right = insert(node->right, e);
 		}
-    else if (strcmp(e.lastname, p->data.lastname) < 0) {
-      p->left = insert(p->left, e);
+    else if (strcmp(e.lastname, node->data.lastname) < 0) {
+      node->left = insert(node->left, e);
     }
-    else if (strcmp(e.lastname, p->data.lastname) > 0) {
-      p->right = insert(p->right, e);
+    else if (strcmp(e.lastname, node->data.lastname) > 0) {
+      node->right = insert(node->right, e);
     }
 		else {
-			return p;
+			return node;
 		}
 	}
-	return p;
+	return node;
 }
 
 /*Creates a new node.*/
-struct tree_node * create_node (struct tree_node *q, struct tree_node *r, Entry e) {
-	struct tree_node* newnode;
-	newnode = (struct tree_node*)(malloc(sizeof(struct tree_node)));
+struct tree * create_node (struct tree *q, struct tree *r, NODE e) {
+	struct tree* newnode;
+	newnode = (struct tree*)(malloc(sizeof(struct tree)));
 	newnode->data = e;
 	newnode->left = q;
 	newnode->right = r;
@@ -62,135 +62,134 @@ struct tree_node * create_node (struct tree_node *q, struct tree_node *r, Entry 
 }
 
 /*Deletes a node from the tree.*/
-struct tree_node * delete_node (struct tree_node *p, char l[], char f[]) {
-	if (strcmp(l, p->data.lastname) < 0 || strcmp(f, p->data.firstname) != 0) {
-		p->left = delete_node(p->left, l, f);
+struct tree * delete_node (struct tree *node, char f[], char l[]) {
+	if (strcmp(l, node->data.firstname) < 0 || strcmp(f, node->data.lastname) != 0) {
+		node->left = delete_node(node->left, l, f);
 	}
-	else if (strcmp(l, p->data.lastname) > 0 || strcmp(f, p->data.firstname) != 0) {
-		p->right = delete_node(p->right, l, f);
+	else if (strcmp(l, node->data.firstname) > 0 || strcmp(f, node->data.lastname) != 0) {
+		node->right = delete_node(node->right, l, f);
 	}
-	else if (p->left != NULL && p->right != NULL) {
-		p->data = findmin(p->right)->data;
-		p->right = delete_node(p->right, l, f);
-		printf("Record deleted successfully.\n\n");
+	else if (node->left != NULL && node->right != NULL) {
+		node->data = findmin(node->right)->data;
+		node->right = delete_node(node->right, l, f);
+		printf("--- Deleted successfully ---\n\n");
 	}
-	else if (p->left != NULL) {
-		p = p->left;
-		printf("Record deleted successfully.\n\n");
+	else if (node->left != NULL) {
+		node = node->left;
+		printf("--- Deleted successfully ---\n\n");
 	}
-	else if (p->right != NULL) {
-		p = p->right;
-		printf("Record deleted successfully.\n\n");
+	else if (node->right != NULL) {
+		node = node->right;
+		printf("--- Deleted successfully ---\n\n");
 	}
 	else {
-		printf("Record could not be found.\n\n");
+		printf("--- Dould not be found ---\n");
 	}
-	return p;
+	return node;
 }
 
-/*Finds the leftmost node in the right branch.*/
-struct tree_node * findmin(struct tree_node *p) {
-	if (p->left != NULL) {
-		findmin(p->left);
+/*menemukan nilai min dari kanan.*/
+struct tree * findmin(struct tree *node) {
+	if (node->left != NULL) {
+		findmin(node->left);
 	}
-	return p;
+	return node;
 }
 
-/*Edits a node's data.*/
-struct tree_node * edit_node (struct tree_node *p, char l[], char f[]) {
+//edit data
+struct tree * edit_node (struct tree *node, char f[], char l[]) {
 	char num[11]; /*Used to determine course of action.*/
-	char e[26]; /*Used to determine course of action.*/
-	if (strcmp(l, p->data.lastname) < 0) {
-		edit_node(p->left, l, f);
+	char e[100]; /*Used to determine course of action.*/
+	if (strcmp(l, node->data.lastname) < 0) {
+		edit_node(node->left, l, f);
 	}
-	else if (strcmp(l, p->data.lastname) > 0) {
-		edit_node(p->right, l, f);
+	else if (strcmp(l, node->data.lastname) > 0) {
+		edit_node(node->right, l, f);
 	}
-	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) != 0) {
-		if (strcmp(f, p->data.firstname) < 0) {
-			edit_node(p->left, l, f);
+	else if (strcmp(l, node->data.firstname) == 0 && strcmp(f, node->data.lastname) != 0) {
+		if (strcmp(f, node->data.firstname) < 0) {
+			edit_node(node->left, l, f);
 		}
-		if (strcmp(f, p->data.firstname) > 0) {
-			edit_node(p->right, l, f);
+		if (strcmp(f, node->data.firstname) > 0) {
+			edit_node(node->right, l, f);
 		}
 	}
-	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) == 0) {
+	else if (strcmp(l, node->data.firstname) == 0 && strcmp(f, node->data.lastname) == 0) {
 		printf("New phone number (Enter s to skip): ");
 		scanf("%s", &num);
 		if (strcmp(num, "s") == 0) {
 			printf("New email address (Enter s to skip): ");
 			scanf("%s", &e);
 			if (strcmp(e, "s") == 0) {
-				printf("Record edited successfully.\n\n");
-				return p;
+				printf("--- Edited successfully ---\n\n");
+				return node;
 			}
 			else {
-				strcpy(p->data.email, e);
-				printf("Record edited successfully.\n\n");
+				strcpy(node->data.email, e);
+				printf("--- edited successfully ---\n\n");
 			}
 		}
 		else {
-			strcpy(p->data.phone, num);
+			strcpy(node->data.phone, num);
 			printf("New email address (Enter s to skip): ");
 			scanf("%s", &e);
 			if (strcmp(e, "s") == 0) {
-				printf("Record edited successfully.\n\n");
-				return p;
+				printf("---- Edited successfully ---\n\n");
+				return node;
 			}
 			else {
-				strcpy(p->data.email, e);
-				printf("Record edited successfully.\n\n");
+				strcpy(node->data.email, e);
+				printf("---- Edited successfully ---\n\n");
 			}
 		}
 	}
 	else {
-		printf("Record could not be found.\n\n");
+		printf("--- Data could not be found ---\n\n");
 	}
-	return p;
+	return node;
 }
 
-void search_node(struct tree_node *p, char l[], char f[]) {
-	if (strcmp(l, p->data.lastname) < 0) {
-		search_node(p->left, l, f);
+void search_node(struct tree *node, char f[], char l[]) {
+	if (strcmp(l, node->data.firstname) < 0) {
+		search_node(node->left, f,l);
 	}
-	else if (strcmp(l, p->data.lastname) > 0) {
-		search_node(p->right, l, f);
+	else if (strcmp(l, node->data.firstname) > 0) {
+		search_node(node->right, f,l);
 	}
-	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) != 0) {
-		if (strcmp(f, p->data.firstname) < 0) {
-			search_node(p->left, l, f);
+	else if (strcmp(l, node->data.firstname) == 0 && strcmp(f, node->data.lastname) != 0) {
+		if (strcmp(f, node->data.lastname) < 0) {
+			search_node(node->left, f,l);
 		}
-		if (strcmp(f, p->data.firstname) > 0) {
-			search_node(p->right, l, f);
+		if (strcmp(f, node->data.lastname) > 0) {
+			search_node(node->right, f,l);
 		}
 	}
-	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) == 0) {
-		printf("%s, %s, %s, %s\n\n", p->data.lastname, p->data.firstname, p->data.phone, p->data.email);
+	else if (strcmp(l, node->data.lastname) == 0 && strcmp(f, node->data.firstname) == 0) {
+		printf("%s, %s, %s, %s\n\n", node->data.firstname,node->data.lastname,  node->data.phone, node->data.email);
 	}
 	else {
-		printf("Record could not be found.\n\n");
+		printf("--- Data could not be found ---\n\n");
 	}
 }
 
-void print_tree(struct tree_node *p)
+void print_tree(struct tree *node)
 {
-	if (p != NULL) {
-		print_tree(p->left);
-		printf("%s, %s, %s, %s\n\n", p->data.lastname, p->data.firstname, p->data.phone, p->data.email);
-		print_tree(p->right);
+	if (node != NULL) {
+		print_tree(node->left);
+		printf("%s, %s, %s, %s\n\n", node->data.firstname,node->data.lastname,  node->data.phone, node->data.email);
+		print_tree(node->right);
 	}
 }
 
 //main menu disini
 int main(void)
 {
-	int pilih = 0; /*Variable for pilih selection.*/
-	Entry e;  /*Basic phone book entry*/
-	struct tree_node *p = NULL; /*Basic tree node*/
-	char ln[16];
-	char fn[11];
+	int pilih = 0;
+	NODE e;
+	struct tree *node = NULL;
+	char last_name[10];
+	char first_name[100];
 
-	/*Return to menu after each instruction until the user quits.*/
 	while (pilih != 6) {
 		printf("*********PHONEBOOK*********\n\n");
 		printf("1. Add Phone Number\n");
@@ -202,143 +201,48 @@ int main(void)
 		printf("\n>> input your choice : ");
 		scanf("%d", &pilih);
 		if (pilih == 1) {
-      printf("Please enter the first name: ");
+      printf("enter the first name: ");
       scanf("%s", &e.firstname);
-			printf("Please enter the last name: ");
+			printf("enter the last name: ");
 			scanf("%s", &e.lastname);
-			printf("Please enter the phone number: ");
+			printf("enter the phone number: ");
 			scanf("%s", &e.phone);
-			printf("Please enter the e-mail address: ");
+			printf("enter the e-mail address: ");
 			scanf("%s", &e.email);
-			p = insert(p, e);
-			printf("Record added successfully.\n\n");
+			node = insert(node, e);
+			printf("--- Added successfully ---\n\n");
 		}
 		else if (pilih == 2) {
-      printf("Please enter the first name: ");
-      scanf("%s", &fn);
-			printf("Please enter the last name: ");
-			scanf("%s", &ln);
-			p = delete_node(p, ln, fn);
+      printf("enter the first name: ");
+      scanf("%s", &first_name);
+			printf("enter the last name: ");
+			scanf("%s", &last_name);
+			node = delete_node(node, first_name, last_name);
 		}
 		else if (pilih == 3) {
-      printf("Please enter the first name: ");
-      scanf("%s", &fn);
-			printf("Please enter the last name: ");
-			scanf("%s", &ln);
-			p = edit_node(p, ln, fn);
+      printf("enter the first name: ");
+      scanf("%s", &first_name);
+			printf("enter the last name: ");
+			scanf("%s", &last_name);
+			node = edit_node(node, first_name, last_name);
 		}
 		else if (pilih == 4) {
-      printf("Please enter the first name: ");
-      scanf("%s", &fn);
-			printf("Please enter the last name: ");
-			scanf("%s", &ln);
-			search_node(p, ln, fn);
+      printf("enter the first name: ");
+      scanf("%s", &first_name);
+			printf("enter the last name: ");
+			scanf("%s", &last_name);
+			search_node(node, first_name, last_name);
 		}
 		else if (pilih == 5) {
-			print_tree(p);
+			print_tree(node);
 		}
 		else if (pilih == 6) {
 			break;
 		}
 		else {
-			printf("That pilih does not exist. Please try again.\n\n");
+			printf("That option does not exist. Please try again.\n\n");
 		}
 
 	}
 	return 0;
-}
-int main()
-{
-	NODE *root=NULL,*nroot=NULL,*sroot=NULL,*broot=NULL;
-	int opt,nsflag=0;
-	root=createNumBST(root);
-	nroot=createNBST(nroot);
-	sroot=createSBST(sroot);
-	while(1)
-    		{
-    		opt=0;
-    		printf("\n________________________________________________________________________________________________________________________________");
-        	printf("\n\t\t\t\t\t\t\tPHONEBOOK\n");
-        	printf("\t\t\t\t\t\t\t``````````");
-        	printf("\n\t\t\t1.Explore Using Name.\n\t\t\t2.Explore Using Surname.\n\t\t\t3.Search Using Full Name.\n\t\t\t4.Delete Contact.(Case-Sensitive)\n\t\t\t5.Add Contact.\n\t\t\t6.Edit Contact (Case-Sensitive)\n\t\t\t7.Back\n\tYour option: ");
-			int opt1,nsflag=0;
-			scanf("%d",&opt1);
-			if(opt1==7)
-				break;
-			switch(opt1)
-			{
-			case 1:
-					//deleteTree(nroot);//deleteTree(sroot);deleteTree(root);
-					//nroot=createNBST(nroot);
-					nameMenu(nroot);
-					break;
-			case 2:
-
-				//deleteTree(sroot);
-				//sroot=createSBST(sroot);
-				surnameMenu(sroot);
-				break;
-			case 3:
-				//deleteTree(nroot);deleteTree(sroot);
-				//nroot=createNBST(nroot);sroot=createSBST(sroot);
-				if(1);
-				char name[20],sname[20],phnum[20];
-				printf("\nEnter name of contact: ");
-				scanf(" %s",name);
-				printf("\nEnter surname of contact: ");
-				scanf(" %s",sname);
-				char tname[20],tsname[20];
-				strcpy(tname,name); strlwr(tname);
-				strcpy(tsname,sname); strlwr(tsname);
-				
-				searchNameSurnameN(nroot,tname,tsname,&nsflag);
-				if(nsflag==0)
-				{
-					int temp;
-					printf("\n%s %s not found.");
-					//printf("\nDid you mean: \n");
-					//searchName(nroot,tname,&temp);
-					{
-						
-						if(temp==0)
-							{
-							printf("\nResults closer to %s : ",name);
-							suggestionsN(nroot,tname);
-							}
-					}
-					temp=0;
-					//searchSurname(nroot,tsname,&temp);
-					{
-						if(temp==0)
-							{
-							printf("\nResults closer to %s :",sname);
-							suggestionsS(sroot,tsname);
-							}
-					}
-				
-				}
-				nsflag=0;
-					//printf("\nName: %s %s\tPhone Number: %s\n",l->name,l->sname,l->phnumber);
-				break;
-			
-				case 4:
-					DeleteContact(&root,&nroot,&sroot,&broot);
-					break;
-				
-				case 5:
-					AddContact(&root,&nroot,&sroot);
-					break;
-				
-				case 6:
-					EditContact(&root,&nroot,&sroot);
-					break;
-					
-				
-			default:
-				printf("\nWrong option entered. Please try again.");
-			}
-		
-		}
-		
-		return 0;
 }
