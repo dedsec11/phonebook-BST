@@ -1,331 +1,249 @@
-#include<stdio.h>
-#include<stdlib.h>
-#include<string.h>
-#include<ctype.h>
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
-typedef struct node
-{
-    	struct node *left;
-    	char name[20];
-    	char sname[20];
-    	char phnumber[20];
-    	struct node *right;
-}NODE;
+typedef struct pbentry {
+	char lastname[16];
+	char firstname[11];
+	char phone[11];
+	char email[26];
+} Entry;
 
-NODE * minValueNode(NODE *node)
-{
-    NODE *current = node;
+/*Create tree node structure.*/
+struct tree_node {
+	Entry data;
+	struct tree_node *left;
+	struct tree_node *right;
+};
 
-    /* loop down to find the leftmost leaf */
-    while (current->left != NULL)
-        current = current->left;
+//function
+struct tree_node * insert(struct tree_node *p, Entry e);
+struct tree_node * create_node (struct tree_node *q, struct tree_node *r, Entry e);
+struct tree_node * delete_node (struct tree_node *p, char l[], char f[]);
+struct tree_node * findmin(struct tree_node *p);
+struct tree_node * edit_node (struct tree_node *p, char l[], char f[]);
+void search_node(struct tree_node *p, char l[], char f[]);
+void print_tree(struct tree_node *p);
 
-    return current;
-}
 
-NODE *createNode(char *name,char *sname, char *phnum)
-{
-        NODE *a=(NODE *)malloc(sizeof(NODE));
-        strcpy(a->phnumber,phnum);
-        strcpy(a->name,name);
-        strcpy(a->sname,sname);
-		    a->left=a->right=NULL;
-        return a;
-}
-
-//insert dengan nama
-//Inserts a node in BST according to name
-void nameInsert(NODE** nroot,char *name,char *sname,char *phnum)
-{
-	NODE *a;
-    if(*nroot==NULL)
-    {
-	    a=createNode(name,sname,phnum);
-        *nroot=a;
-        return;
+/*Adds a node to the tree.*/
+struct tree_node * insert(struct tree_node *p, Entry e) {
+	if (p == NULL) {
+		p = create_node(NULL, NULL, e); //membuat root
+	}
+	else {
+		if (strcmp(e.firstname, p->data.firstname) < 0) {
+			p->left = insert(p->left, e);
+		}
+		else if (strcmp(e.firstname, p->data.firstname) > 0) {
+			p->right = insert(p->right, e);
+		}
+    else if (strcmp(e.lastname, p->data.lastname) < 0) {
+      p->left = insert(p->left, e);
     }
-    else
-    {
-    	if(strcmp((name),((*nroot)->name))==-1)
-    		nameInsert(&((*nroot)->left),name,sname,phnum);
-    	else
-    		nameInsert(&((*nroot)->right),name,sname,phnum);
+    else if (strcmp(e.lastname, p->data.lastname) > 0) {
+      p->right = insert(p->right, e);
+    }
+		else {
+			return p;
+		}
+	}
+	return p;
+}
+
+/*Creates a new node.*/
+struct tree_node * create_node (struct tree_node *q, struct tree_node *r, Entry e) {
+	struct tree_node* newnode;
+	newnode = (struct tree_node*)(malloc(sizeof(struct tree_node)));
+	newnode->data = e;
+	newnode->left = q;
+	newnode->right = r;
+	return newnode;
+}
+
+/*Deletes a node from the tree.*/
+struct tree_node * delete_node (struct tree_node *p, char l[], char f[]) {
+	if (strcmp(l, p->data.lastname) < 0 || strcmp(f, p->data.firstname) != 0) {
+		p->left = delete_node(p->left, l, f);
+	}
+	else if (strcmp(l, p->data.lastname) > 0 || strcmp(f, p->data.firstname) != 0) {
+		p->right = delete_node(p->right, l, f);
+	}
+	else if (p->left != NULL && p->right != NULL) {
+		p->data = findmin(p->right)->data;
+		p->right = delete_node(p->right, l, f);
+		printf("Record deleted successfully.\n\n");
+	}
+	else if (p->left != NULL) {
+		p = p->left;
+		printf("Record deleted successfully.\n\n");
+	}
+	else if (p->right != NULL) {
+		p = p->right;
+		printf("Record deleted successfully.\n\n");
+	}
+	else {
+		printf("Record could not be found.\n\n");
+	}
+	return p;
+}
+
+/*Finds the leftmost node in the right branch.*/
+struct tree_node * findmin(struct tree_node *p) {
+	if (p->left != NULL) {
+		findmin(p->left);
+	}
+	return p;
+}
+
+/*Edits a node's data.*/
+struct tree_node * edit_node (struct tree_node *p, char l[], char f[]) {
+	char num[11]; /*Used to determine course of action.*/
+	char e[26]; /*Used to determine course of action.*/
+	if (strcmp(l, p->data.lastname) < 0) {
+		edit_node(p->left, l, f);
+	}
+	else if (strcmp(l, p->data.lastname) > 0) {
+		edit_node(p->right, l, f);
+	}
+	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) != 0) {
+		if (strcmp(f, p->data.firstname) < 0) {
+			edit_node(p->left, l, f);
+		}
+		if (strcmp(f, p->data.firstname) > 0) {
+			edit_node(p->right, l, f);
+		}
+	}
+	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) == 0) {
+		printf("New phone number (Enter s to skip): ");
+		scanf("%s", &num);
+		if (strcmp(num, "s") == 0) {
+			printf("New email address (Enter s to skip): ");
+			scanf("%s", &e);
+			if (strcmp(e, "s") == 0) {
+				printf("Record edited successfully.\n\n");
+				return p;
+			}
+			else {
+				strcpy(p->data.email, e);
+				printf("Record edited successfully.\n\n");
+			}
+		}
+		else {
+			strcpy(p->data.phone, num);
+			printf("New email address (Enter s to skip): ");
+			scanf("%s", &e);
+			if (strcmp(e, "s") == 0) {
+				printf("Record edited successfully.\n\n");
+				return p;
+			}
+			else {
+				strcpy(p->data.email, e);
+				printf("Record edited successfully.\n\n");
+			}
+		}
+	}
+	else {
+		printf("Record could not be found.\n\n");
+	}
+	return p;
+}
+
+void search_node(struct tree_node *p, char l[], char f[]) {
+	if (strcmp(l, p->data.lastname) < 0) {
+		search_node(p->left, l, f);
+	}
+	else if (strcmp(l, p->data.lastname) > 0) {
+		search_node(p->right, l, f);
+	}
+	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) != 0) {
+		if (strcmp(f, p->data.firstname) < 0) {
+			search_node(p->left, l, f);
+		}
+		if (strcmp(f, p->data.firstname) > 0) {
+			search_node(p->right, l, f);
+		}
+	}
+	else if (strcmp(l, p->data.lastname) == 0 && strcmp(f, p->data.firstname) == 0) {
+		printf("%s, %s, %s, %s\n\n", p->data.lastname, p->data.firstname, p->data.phone, p->data.email);
+	}
+	else {
+		printf("Record could not be found.\n\n");
 	}
 }
 
-
-//tambah kontak
-// ---------------------------------------------------------
-void AddContact(NODE **root,NODE **nroot,NODE **sroot)
+void print_tree(struct tree_node *p)
 {
-	// Take details from user.
-	char name[20],sname[20],phnum[20];
-	printf("Enter name of contact: ");
-	scanf(" %s",name);
-	printf("Enter surname of contact: ");
-	scanf(" %s",sname);
-	printf("Enter phone number of contact: ");
-	scanf(" %s",phnum);
-	NODE *k=searchNumber(*root,phnum);
-				if(k!=NULL)
-				{
-					printf("Contact with same phone number already exists!");
-					printf("\n\tName: %s %s\tPhone number: %s",k->name,k->sname,k->phnumber);
-					return;
-				}
-	//Write the  new contact to phonebook.txt
-	FILE *fp;
-	fp=fopen("phonebook.txt","a");
-	fprintf(fp,"%s %s %s\n",name,sname,phnum);
-	fclose(fp);
-    //Add the contact's phone number to BST
-	NODE *a,*b,*c;
-    if(*nroot==NULL)
-    {
-	    a=createNode(name,sname,phnum);
-        *nroot=a;
-        return;
-    }
-    else
-    {
-    	if(strcmp((name),((*nroot)->name))==-1)
-    		nameInsert(&((*nroot)->left),name,sname,phnum);
-    	else
-    		nameInsert(&((*nroot)->right),name,sname,phnum);
+	if (p != NULL) {
+		print_tree(p->left);
+		printf("%s, %s, %s, %s\n\n", p->data.lastname, p->data.firstname, p->data.phone, p->data.email);
+		print_tree(p->right);
 	}
-
-	if(*sroot==NULL)
-    {
-	    b=createNode(name,sname,phnum);
-        *sroot=b;
-        return;
-    }
-    else
-    {
-    	if(strcmp((sname),((*sroot)->sname))==-1)
-    		surnameInsert(&((*sroot)->left),name,sname,phnum);
-    	else
-    		surnameInsert(&((*sroot)->right),name,sname,phnum);
-	}
-
-	if(*root==NULL)
-    {
-	    c=createNode(name,sname,phnum);
-        *root=c;
-        return;
-    }
-    else
-    {
-    	if(strcmp((phnum),((*root)->phnumber))==-1)
-    		numInsert(&((*root)->left),name,sname,phnum);
-    	else
-    		numInsert(&((*root)->right),name,sname,phnum);
-	}
-
-	return;
 }
-// ---------------------------------------------------------
 
+//main menu disini
+int main(void)
+{
+	int pilih = 0; /*Variable for pilih selection.*/
+	Entry e;  /*Basic phone book entry*/
+	struct tree_node *p = NULL; /*Basic tree node*/
+	char ln[16];
+	char fn[11];
 
-// edit kontak
-// ---------------------------------------------------------
-void EditContact(NODE **root,NODE **nroot,NODE **sroot)
-	{
-		FILE *fp;
-		int flag;
-		fp=fopen("phonebook.txt","r");
-		char fname[20],fsname[20],name[20],sname[20],fnum[20],num[20],newname[20];
-		printf("\nEnter name and surname whose details are to be edited: ");
-		scanf(" %s %s",name,sname);
-		//char tname[20];
-		//strcpy(tname,name); strlwr(tname);
-		while(1)
-		{
-		flag=fscanf(fp,"%s %s %s\n",fname,fsname,fnum);
-		if(flag==EOF)
-		{
-			printf("\nContact not found.");
-			suggestionsN(*nroot,name);
-			suggestionsS(*sroot,sname);
-			fclose(fp);
+	/*Return to menu after each instruction until the user quits.*/
+	while (pilih != 6) {
+		printf("*********PHONEBOOK*********\n\n");
+		printf("1. Add Phone Number\n");
+		printf("2. Delete Phone Number\n");
+		printf("3. Edit Phone Number\n");
+		printf("4. Search Phone Number\n");
+		printf("5. Show Phonebook \n");
+		printf("6. Quit\n");
+		printf("\n>> input your choice : ");
+		scanf("%d", &pilih);
+		if (pilih == 1) {
+      printf("Please enter the first name: ");
+      scanf("%s", &e.firstname);
+			printf("Please enter the last name: ");
+			scanf("%s", &e.lastname);
+			printf("Please enter the phone number: ");
+			scanf("%s", &e.phone);
+			printf("Please enter the e-mail address: ");
+			scanf("%s", &e.email);
+			p = insert(p, e);
+			printf("Record added successfully.\n\n");
+		}
+		else if (pilih == 2) {
+      printf("Please enter the first name: ");
+      scanf("%s", &fn);
+			printf("Please enter the last name: ");
+			scanf("%s", &ln);
+			p = delete_node(p, ln, fn);
+		}
+		else if (pilih == 3) {
+      printf("Please enter the first name: ");
+      scanf("%s", &fn);
+			printf("Please enter the last name: ");
+			scanf("%s", &ln);
+			p = edit_node(p, ln, fn);
+		}
+		else if (pilih == 4) {
+      printf("Please enter the first name: ");
+      scanf("%s", &fn);
+			printf("Please enter the last name: ");
+			scanf("%s", &ln);
+			search_node(p, ln, fn);
+		}
+		else if (pilih == 5) {
+			print_tree(p);
+		}
+		else if (pilih == 6) {
 			break;
-	 	}
-		if(strcmp(fname,name)==0 && strcmp(fsname,sname)==0)
-		{
-			fclose(fp);
-			printf("\nEnter new name of contact: ");
-			scanf(" %s",newname);
-			printf("\nEnter new surname of contact: ");
-			scanf(" %s",sname);
-			printf("\nEnter new number of contact: ");
-			scanf(" %s",num);
-
-			NODE *k=searchNumber(*root,num);
-				if(k!=NULL)
-				{
-					printf("Contact with same phone number already exists!");
-					printf("\n\tName: %s %s\tPhone number: %s",k->name,k->sname,k->phnumber);
-					return;
-				}
-
-			*nroot=nameDeleteNode(*nroot,fname);
-			*sroot=surnameDeleteNode(*sroot,fsname);
-			*root=numDeleteNode(*root,fnum);
-
-			nameInsert(nroot,newname,sname,num);
-			surnameInsert(sroot,newname,sname,num);
-			numInsert(root,newname,sname,num);
-
-			fp=fopen("phonebook.txt","w");
-			treeToFile(*nroot,fp);
-			fclose(fp);
-			break;
+		}
+		else {
+			printf("That pilih does not exist. Please try again.\n\n");
 		}
 
 	}
-	return;
-}
-// ---------------------------------------------------------
-
-// delete kontak
-// ---------------------------------------------------------
-void DeleteContact(NODE **root,NODE **nroot,NODE **sroot,NODE **broot)
-{
-				int tflg=0; char topt;
-				char name[20],sname[20],fname[20],fsname[20],fphnum[20];
-				printf("\nEnter name and surname whose contact is to be deleted: ");
-				scanf(" %s %s",name,sname);
-				FILE *fpr;
-				fpr=fopen("phonebook.txt","r");
-				while(1)
-				{
-					int rv=fscanf(fpr,"%s %s %s\n",fname,fsname,fphnum);
-					if(rv==EOF)
-						break;
-					if((strcmp(fname,name)==0) && (strcmp(fsname,sname)==0))
-						{
-							tflg=1;
-							break;
-						}
-				}
-				fclose(fpr);
-				if(tflg==1)
-				{
-					printf("\nName:%s %s\tPhone Number: %s ",fname,fsname,fphnum);
-					printf("\nAre you sure to delete this contact ?(Y/N)\n");
-					scanf(" %c",&topt);
-					if(topt=='y' || topt=='Y')
-					{
-					*nroot=nameDeleteNode(*nroot,fname);
-					*sroot=surnameDeleteNode(*sroot,fsname);
-					*root=numDeleteNode(*root,fphnum);
-
-					FILE*fp=fopen("rphonebook.txt","a");
-            		fprintf(fp,"%s %s %s\n",fname,fsname,fphnum);
-            		fclose(fp);
-					nameInsert(broot,fname,fsname,fphnum);
-
-					FILE *fp1;
-					fp1=fopen("phonebook.txt","w");
-					//treeToFile(*nroot,fp1);
-					fclose(fp1);
-					}
-					return;
-				}
-				else
-				{
-					printf("\nContact not found. ");
-					return;
-				}
-}
-// ---------------------------------------------------------
- // Search dengan nama
- NODE* nameDeleteNode(NODE *nroot, char *name)
- {
-     // base case
-     if (nroot == NULL) return nroot;
-
- 	//If the key to be deleted is smaller than the root's key, then it lies in left subtree
-     if (strcmp(name,nroot->name)==-1)
-         nroot->left = nameDeleteNode(nroot->left,name);
-
-     // If the key to be deleted is greater than the root's key,then it lies in right subtree
-     else if (strcmp(name,nroot->name)==1)
-         nroot->right = nameDeleteNode(nroot->right,name);
-
-     // if key is same as root's key, then This is the node to be deleted
-     else
-     {
-         // node with only one child or no child
-         if (nroot->left == NULL)
-         {
-             NODE *temp = nroot->right;
-
-             free(nroot);
-             return temp;
-         }
-         else if (nroot->right == NULL)
-         {
-             NODE *temp = nroot->left;
-
-             free(nroot);
-             return temp;
-         }
-
-         //Node with two children: Get the inorder successor (smallest in the right subtree)
-         NODE *temp=(NODE*)malloc(sizeof(NODE)) ;
- 		temp= (NODE*)minValueNode(nroot->right);
-
-         //Copy the inorder successor's content to this node
-         strcpy(nroot->name,temp->name);
-
-         //Delete the inorder successor
-         nroot->right = nameDeleteNode(nroot->right,temp->name);
-     }
-     return nroot;
- }
-
-//search name
-void searchName(NODE *nroot,char *nm,int *flg)
-{
-	if(nroot==NULL) //base case
-     {
-     	 return;
-	 }
-
-	char tmp[20];
-	strcpy(tmp,(nroot->name));
-	strlwr(tmp);
-
-	if (strcmp(tmp,nm)==0)
-	{
-		printf("\n\tName: %s %s\tPhone Number: %s",nroot->name,nroot->sname,nroot->phnumber);
-		*flg=1;
-		searchName(nroot->right,nm,flg);
-	}
-    if (strcmp(tmp,nm)==-1)
-    	searchName(nroot->right,nm,flg);
-	else
-    	searchName(nroot->left,nm,flg);
-}
-
-//create nomor
-NODE* createNBST(NODE *nroot)
-{
-	nroot=NULL;
-	char phnum[20];
-    	char name[20];
-    	char sname[20];
-    	FILE *fp,*fpn;
-	    fp=fopen("phonebook.txt","r");
-    	while(1)  //Create BST from file phonebook.txt
-			{
-				int flag;
-				flag=fscanf(fp,"%s %s %s\n",name,sname,phnum);
-       			if(flag==EOF)
-	  				break;
-        		nameInsert(&nroot,name,sname,phnum);
-			}
-		fclose(fp);
-		return nroot;
+	return 0;
 }
