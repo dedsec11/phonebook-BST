@@ -5,7 +5,7 @@
 typedef struct phonebook {
   char firstname[100];
 	char lastname[100];
-	char phone[11];
+	int phone;
 	char email[100];
 } NODE;
 
@@ -16,13 +16,13 @@ struct tree {
 	struct tree *right;
 };
 
-//function
+
 struct tree * insert(struct tree *node, NODE e);
 struct tree * create_node (struct tree *q, struct tree *r, NODE e);
 struct tree * delete_node (struct tree *node, char l[], char f[]);
 struct tree * findmin(struct tree *node);
 struct tree * edit_node (struct tree *node, char l[], char f[]);
-void search_node(struct tree *node, char l[], char f[]);
+void search_node(struct tree *node, char f[], char l[]);
 void print_tree(struct tree *node);
 
 
@@ -116,12 +116,12 @@ struct tree * edit_node (struct tree *node, char f[], char l[]) {
 		}
 	}
 	else if (strcmp(f, node->data.firstname) == 0 && strcmp(l, node->data.lastname) == 0) {
-		printf("New phone number (Enter s to skip): ");
-		scanf("%s", &num);
-		if (strcmp(num, "s") == 0) {
-			printf("New email address (Enter s to skip): ");
+		printf("New phone number (Enter n to skip): ");
+		scanf("%d", &num);
+		if (strcmp(num, "n") == 0) {
+			printf("New email address (Enter n to skip): ");
 			scanf("%s", &e);
-			if (strcmp(e, "s") == 0) {
+			if (strcmp(e, "n") == 0) {
 				printf("--- Edited successfully ---\n\n");
 				return node;
 			}
@@ -131,10 +131,10 @@ struct tree * edit_node (struct tree *node, char f[], char l[]) {
 			}
 		}
 		else {
-			strcpy(node->data.phone, num);
-			printf("New email address (Enter s to skip): ");
+			node->data.phone, num;
+			printf("New email address (Enter n to skip): ");
 			scanf("%s", &e);
-			if (strcmp(e, "s") == 0) {
+			if (strcmp(e, "n") == 0) {
 				printf("---- Edited successfully ---\n\n");
 				return node;
 			}
@@ -167,7 +167,9 @@ void search_node(struct tree *node, char f[], char l[]) {
 		}
 	}
 	else if (strcmp(f, node->data.firstname) == 0 && strcmp(l, node->data.lastname) == 0) {
-		printf("%s, %s, %s, %s\n\n", node->data.firstname,node->data.lastname,  node->data.phone, node->data.email);
+    printf("\n\nFirstname \t Lastname \t Phone-number \t\t Email\n\n");
+    printf("%s \t\t %s \t\t %d \t\t %s\n\n\n",node->data.firstname,node->data.lastname,  node->data.phone, node->data.email );
+		print_tree(node->right);
 	}
 	else {
 		printf("--- Data could not be found ---\n\n");
@@ -178,7 +180,8 @@ void print_tree(struct tree *node)
 {
 	if (node != NULL) {
 		print_tree(node->left);
-		printf("%s, %s, %s, %s\n\n", node->data.firstname,node->data.lastname,  node->data.phone, node->data.email);
+		printf("Firstname \t Lastname \t Phone-number \t\t Email\n\n");
+    printf("%s \t\t %s \t\t %d \t\t %s\n\n\n",node->data.firstname,node->data.lastname,  node->data.phone, node->data.email );
 		print_tree(node->right);
 	}
 }
@@ -208,8 +211,8 @@ int main(void)
 			printf("enter the last name: ");
 			scanf("%s", &e.lastname);
 			printf("enter the phone number: ");
-			scanf("%s", &e.phone);
-			printf("enter the e-mail address: ");
+			scanf("%d", &e.phone);
+			printf("enter email address: ");
 			scanf("%s", &e.email);
 			node = insert(node, e);
 			printf("--- Added successfully ---\n\n");
