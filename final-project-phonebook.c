@@ -26,7 +26,17 @@ void search_node(struct tree *node, char l[], char f[]);
 void print_tree(struct tree *node);
 
 
-/*Adds a node to the tree.*/
+//membuat node
+struct tree * create_node (struct tree *q, struct tree *r, NODE e) {
+	struct tree* newnode;
+	newnode = (struct tree*)(malloc(sizeof(struct tree)));
+	newnode->data = e;
+	newnode->left = q;
+	newnode->right = r;
+	return newnode;
+}
+
+//menambahkan data ke dalam phoneb
 struct tree * insert(struct tree *node, NODE e) {
 	if (node == NULL) {
 		node = create_node(NULL, NULL, e); //membuat root
@@ -51,27 +61,18 @@ struct tree * insert(struct tree *node, NODE e) {
 	return node;
 }
 
-/*Creates a new node.*/
-struct tree * create_node (struct tree *q, struct tree *r, NODE e) {
-	struct tree* newnode;
-	newnode = (struct tree*)(malloc(sizeof(struct tree)));
-	newnode->data = e;
-	newnode->left = q;
-	newnode->right = r;
-	return newnode;
-}
 
-/*Deletes a node from the tree.*/
+//menghapus data node
 struct tree * delete_node (struct tree *node, char f[], char l[]) {
-	if (strcmp(l, node->data.firstname) < 0 || strcmp(f, node->data.lastname) != 0) {
-		node->left = delete_node(node->left, l, f);
+	if (strcmp(f, node->data.firstname) < 0 || strcmp(l, node->data.lastname) != 0) {
+		node->left = delete_node(node->left, f, l);
 	}
-	else if (strcmp(l, node->data.firstname) > 0 || strcmp(f, node->data.lastname) != 0) {
-		node->right = delete_node(node->right, l, f);
+	else if (strcmp(f, node->data.firstname) > 0 || strcmp(l, node->data.lastname) != 0) {
+		node->right = delete_node(node->right, f, l);
 	}
 	else if (node->left != NULL && node->right != NULL) {
 		node->data = findmin(node->right)->data;
-		node->right = delete_node(node->right, l, f);
+		node->right = delete_node(node->right, f, l);
 		printf("--- Deleted successfully ---\n\n");
 	}
 	else if (node->left != NULL) {
@@ -98,8 +99,8 @@ struct tree * findmin(struct tree *node) {
 
 //edit data
 struct tree * edit_node (struct tree *node, char f[], char l[]) {
-	char num[11]; /*Used to determine course of action.*/
-	char e[100]; /*Used to determine course of action.*/
+	char num[11];
+	char e[100];
 	if (strcmp(l, node->data.lastname) < 0) {
 		edit_node(node->left, l, f);
 	}
