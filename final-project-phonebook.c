@@ -65,12 +65,12 @@ struct tree * insert(struct tree *node, NODE e) {
 //menghapus data node
 struct tree * delete_node (struct tree *node, char f[], char l[]) {
 	if (strcmp(f, node->data.firstname) < 0 || strcmp(l, node->data.lastname) != 0) {
-		node->left = delete_node(node->left, f, l);
+		node->left = delete_node(node->left, f, l); //menghapus data dari branch kiri
 	}
 	else if (strcmp(f, node->data.firstname) > 0 || strcmp(l, node->data.lastname) != 0) {
-		node->right = delete_node(node->right, f, l);
+		node->right = delete_node(node->right, f, l); //menghapus data dari branch kanan
 	}
-	else if (node->left != NULL && node->right != NULL) {
+	else if (node->left != NULL && node->right != NULL) { //jika data dari branch kiri NULL jadi data tersebut sudah terhapus
 		node->data = findmin(node->right)->data;
 		node->right = delete_node(node->right, f, l);
 		printf("--- Deleted successfully ---\n\n");
@@ -84,12 +84,12 @@ struct tree * delete_node (struct tree *node, char f[], char l[]) {
 		printf("--- Deleted successfully ---\n\n");
 	}
 	else {
-		printf("--- Dould not be found ---\n");
+		printf("--- Data could not be found ---\n");
 	}
 	return node;
 }
 
-/*menemukan nilai min dari kanan.*/
+/*menemukan nilai paling kiri dari branch kanan.*/
 struct tree * findmin(struct tree *node) {
 	if (node->left != NULL) {
 		findmin(node->left);
@@ -101,21 +101,21 @@ struct tree * findmin(struct tree *node) {
 struct tree * edit_node (struct tree *node, char f[], char l[]) {
 	char num[11];
 	char e[100];
-	if (strcmp(l, node->data.lastname) < 0) {
-		edit_node(node->left, l, f);
+	if (strcmp(f, node->data.firstname) < 0) {
+		edit_node(node->left, f, l);
 	}
-	else if (strcmp(l, node->data.lastname) > 0) {
-		edit_node(node->right, l, f);
+	else if (strcmp(f, node->data.firstname) > 0) {
+	edit_node(node->right, f, l);
 	}
-	else if (strcmp(l, node->data.firstname) == 0 && strcmp(f, node->data.lastname) != 0) {
+	else if (strcmp(f, node->data.firstname) == 0 && strcmp(l, node->data.lastname) != 0) {
 		if (strcmp(f, node->data.firstname) < 0) {
-			edit_node(node->left, l, f);
+		edit_node(node->left, f, l);
 		}
 		if (strcmp(f, node->data.firstname) > 0) {
-			edit_node(node->right, l, f);
+			edit_node(node->right, f, l);
 		}
 	}
-	else if (strcmp(l, node->data.firstname) == 0 && strcmp(f, node->data.lastname) == 0) {
+	else if (strcmp(f, node->data.firstname) == 0 && strcmp(l, node->data.lastname) == 0) {
 		printf("New phone number (Enter s to skip): ");
 		scanf("%s", &num);
 		if (strcmp(num, "s") == 0) {
@@ -150,14 +150,15 @@ struct tree * edit_node (struct tree *node, char f[], char l[]) {
 	return node;
 }
 
+//search data phonebook
 void search_node(struct tree *node, char f[], char l[]) {
-	if (strcmp(l, node->data.firstname) < 0) {
-		search_node(node->left, f,l);
+	if (strcmp(f, node->data.firstname) < 0) {
+		search_node(node->left, f,l); //mencari data dari branch kiri
 	}
-	else if (strcmp(l, node->data.firstname) > 0) {
-		search_node(node->right, f,l);
+	else if (strcmp(f, node->data.firstname) > 0) {
+		search_node(node->right, f,l); //mencari data dari branch kanan
 	}
-	else if (strcmp(l, node->data.firstname) == 0 && strcmp(f, node->data.lastname) != 0) {
+	else if (strcmp(f, node->data.firstname) == 0 && strcmp(l, node->data.lastname) != 0) {
 		if (strcmp(f, node->data.lastname) < 0) {
 			search_node(node->left, f,l);
 		}
@@ -165,7 +166,7 @@ void search_node(struct tree *node, char f[], char l[]) {
 			search_node(node->right, f,l);
 		}
 	}
-	else if (strcmp(l, node->data.lastname) == 0 && strcmp(f, node->data.firstname) == 0) {
+	else if (strcmp(f, node->data.firstname) == 0 && strcmp(l, node->data.lastname) == 0) {
 		printf("%s, %s, %s, %s\n\n", node->data.firstname,node->data.lastname,  node->data.phone, node->data.email);
 	}
 	else {
@@ -188,7 +189,7 @@ int main(void)
 	int pilih = 0;
 	NODE e;
 	struct tree *node = NULL;
-	char last_name[10];
+	char last_name[100];
 	char first_name[100];
 
 	while (pilih != 6) {
@@ -223,8 +224,8 @@ int main(void)
 		else if (pilih == 3) {
       printf("enter the first name: ");
       scanf("%s", &first_name);
-			printf("enter the last name: ");
-			scanf("%s", &last_name);
+      printf("enter the last name: ");
+      scanf("%s", &last_name);
 			node = edit_node(node, first_name, last_name);
 		}
 		else if (pilih == 4) {
