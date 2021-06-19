@@ -9,7 +9,7 @@ typedef struct phonebook {
 	char email[100];
 } NODE;
 
-/*Create tree node structure.*/
+
 struct tree {
 	NODE data;
 	struct tree *left;
